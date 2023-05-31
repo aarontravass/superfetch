@@ -35,7 +35,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
         })
       })
       const conn = await handlerOrListener.accept()
-      return { p, handlerOrListener as listener }
+      return { resp: p, listener: handlerOrListener }
     }
   } // (req, conn) => Response listener
   else {
@@ -62,7 +62,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
       })
       const conn = await listener.accept()
       await serve(conn)
-      return { p, listener }
+      return { resp: p, listener: listener }
     }
   }
 }
