@@ -24,8 +24,8 @@ const fetchEndpoint = async (
 const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
   // listener
   if ('rid' in handlerOrListener && 'addr' in handlerOrListener) {
-    console.log("in if");
-    return async (url: URL | string = '', params?: RequestInit) => {
+    console.log('in if')
+    const resp = async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
         setTimeout(async () => {
           const { res, data } = await fetchEndpoint(port, url, params)
@@ -35,11 +35,15 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
         })
       })
       const conn = await handlerOrListener.accept()
-      return { resp: p, listener: handlerOrListener }
+      return p
+    }
+    return {
+      resp,
+      listener: handlerOrListener,
     }
   } // (req, conn) => Response listener
   else {
-    console.log("in the else");
+    console.log('in the else')
     const listener = Deno.listen({ port, hostname: 'localhost' })
 
     const serve = async (conn: Deno.Conn) => {
@@ -51,7 +55,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
       }
     }
 
-    return async (url: URL | string = '', params?: RequestInit) => {
+    const resp = async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
         setTimeout(async () => {
           const { res, data } = await fetchEndpoint(port, url, params)
@@ -62,7 +66,11 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
       })
       const conn = await listener.accept()
       await serve(conn)
-      return { resp: p, listener: listener }
+      return p
+    }
+    return {
+      resp,
+      listener
     }
   }
 }
@@ -86,6 +94,7 @@ export const makeFetch = (h: HandlerOrListener) => {
         expectStatus,
         expectHeader,
         expectBody,
+        close
       }
     }
     const expectHeader = (a: string, b: string | RegExp | null | string[]) => {
@@ -125,6 +134,7 @@ export const makeFetch = (h: HandlerOrListener) => {
         expectStatus,
         expectHeader,
         expectBody,
+        close
       }
     }
     const expectBody = (a: unknown) => {
@@ -144,6 +154,7 @@ export const makeFetch = (h: HandlerOrListener) => {
         expectStatus,
         expectHeader,
         expectBody,
+        close
       }
     }
 
@@ -152,6 +163,7 @@ export const makeFetch = (h: HandlerOrListener) => {
       expectStatus,
       expectHeader,
       expectBody,
+      close
     }
   }
   return fetch
