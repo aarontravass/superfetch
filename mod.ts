@@ -35,7 +35,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
         })
       })
       const conn = await handlerOrListener.accept()
-      return p
+      return { p, handlerOrListener as listener }
     }
   } // (req, conn) => Response listener
   else {
@@ -62,15 +62,16 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
       })
       const conn = await listener.accept()
       await serve(conn)
-      return p
+      return { p, listener }
     }
   }
 }
 
 export const makeFetch = (h: HandlerOrListener) => {
-  const resp = makeFetchPromise(h)
+  const { resp, listener } = makeFetchPromise(h)
   async function fetch(url: string | URL, options?: RequestInit) {
     const { data, res } = await resp(url, options)
+    const close = () => listener.close()
     const expectStatus = (a: number, b?: string) => {
       assertEquals(
         res.status,
