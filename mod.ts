@@ -61,7 +61,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
           const { res, data } = await fetchEndpoint(port, url, params)
           resolve({ res, data })
           Deno.close(conn.rid + 1)
-          listener.close()
+          //listener.close()
         })
       })
       const conn = await listener.accept()
