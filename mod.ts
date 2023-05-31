@@ -24,6 +24,7 @@ const fetchEndpoint = async (
 const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
   // listener
   if ('rid' in handlerOrListener && 'addr' in handlerOrListener) {
+    console.log("in if");
     return async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
         setTimeout(async () => {
@@ -38,6 +39,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
     }
   } // (req, conn) => Response listener
   else {
+    console.log("in the else");
     const listener = Deno.listen({ port, hostname: 'localhost' })
 
     const serve = async (conn: Deno.Conn) => {
