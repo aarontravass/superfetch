@@ -21,15 +21,15 @@ const fetchEndpoint = async (
   return { res, data }
 }
 
-const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
+const makeFetchPromise = async (handlerOrListener: HandlerOrListener, port?: number) => {
   // listener
-  const port = await getFreePort(8080)
+  const freePort = port || await getFreePort(8080)
   console.log(port)
   if ('rid' in handlerOrListener && 'addr' in handlerOrListener) {
     return async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
         setTimeout(async () => {
-          const { res, data } = await fetchEndpoint(port, url, params)
+          const { res, data } = await fetchEndpoint(freePort, url, params)
           resolve({ res, data })
           Deno.close(conn.rid + 1)
           handlerOrListener.close()
@@ -40,7 +40,7 @@ const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
     }
   } // (req, conn) => Response listener
   else {
-    const listener = Deno.listen({ port, hostname: 'localhost' })
+    const listener = Deno.listen({ port: freePort, hostname: 'localhost' })
     const closeListener = () => new Promise<void>((resolve) => {
       resolve(listener.close());
     })
@@ -56,7 +56,7 @@ const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
     return async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
         setTimeout(async () => {
-          const { res, data } = await fetchEndpoint(port, url, params)
+          const { res, data } = await fetchEndpoint(freePort, url, params)
           resolve({ res, data })
           Deno.close(conn.rid + 1)
           await closeListener.bind(this)()
