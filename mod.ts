@@ -1,7 +1,7 @@
 import { assertEquals, assertMatch, getFreePort } from './deps.ts'
 import { HandlerOrListener } from './types.ts'
 
-const port = await getFreePort(8080)
+
 
 const fetchEndpoint = async (
   port: number,
@@ -21,8 +21,9 @@ const fetchEndpoint = async (
   return { res, data }
 }
 
-const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
+const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
   // listener
+  const port = await getFreePort(8080)
   if ('rid' in handlerOrListener && 'addr' in handlerOrListener) {
     return async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
@@ -68,7 +69,7 @@ const makeFetchPromise = (handlerOrListener: HandlerOrListener) => {
 export const makeFetch = (h: HandlerOrListener) => {
   const resp = makeFetchPromise(h)
   async function fetch(url: string | URL, options?: RequestInit) {
-    const { data, res } = await resp(url, options)
+    const { data, res } = (await (await resp)(url, options))
     const expectStatus = (a: number, b?: string) => {
       assertEquals(
         res.status,
