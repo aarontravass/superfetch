@@ -69,8 +69,8 @@ const makeFetchPromise = async (handlerOrListener: HandlerOrListener, port?: num
   }
 }
 
-export const makeFetch = (h: HandlerOrListener) => {
-  const resp = makeFetchPromise(h)
+export const makeFetch = (h: HandlerOrListener, port?: number) => {
+  const resp = makeFetchPromise(h, port)
   async function fetch(url: string | URL, options?: RequestInit) {
     const { data, res } = (await (await resp)(url, options))
     const expectStatus = (a: number, b?: string) => {
