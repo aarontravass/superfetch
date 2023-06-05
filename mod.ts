@@ -41,7 +41,9 @@ const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
   } // (req, conn) => Response listener
   else {
     const listener = Deno.listen({ port, hostname: 'localhost' })
-
+    const closeListener = () => new Promise<void>((resolve) => {
+      resolve(listener.close());
+    })
     const serve = async (conn: Deno.Conn) => {
       const requests = Deno.serveHttp(conn)
       const { request, respondWith } = (await requests.nextRequest())!
@@ -57,7 +59,7 @@ const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
           const { res, data } = await fetchEndpoint(port, url, params)
           resolve({ res, data })
           Deno.close(conn.rid + 1)
-          listener.close()
+          await closeListener.bind(this)()
         })
       })
       const conn = await listener.accept()
