@@ -24,6 +24,7 @@ const fetchEndpoint = async (
 const makeFetchPromise = async (handlerOrListener: HandlerOrListener) => {
   // listener
   const port = await getFreePort(8080)
+  console.log(port)
   if ('rid' in handlerOrListener && 'addr' in handlerOrListener) {
     return async (url: URL | string = '', params?: RequestInit) => {
       const p = new Promise<{ res: Response; data?: unknown }>((resolve) => {
